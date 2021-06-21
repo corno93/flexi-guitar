@@ -1,66 +1,25 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src=https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.17/Tone.js></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="./styles.css">
+    <title>Fretboard</title>
+</head>
+<body>
 
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src=https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.17/Tone.js></script>
-    </head>
+    <div class="settings">
+        <div class="number-of-frets">
+            <label for="number-of-frets">Number of frets: </label>
+            <input type="number" id="number-of-frets" min="1" max="50" value="12">
+        </div>
+    </div>
 
-    <body>
+    <div class="fretboard"></div>
+    <script src="./app.js"></script>
 
-        <form id="stringForm1" action="/string" method="get">
-            <input id="note" name="note" type="text" value="E0">
-            <label for="open_note">Open note</label><br>
-            <input type="submit" value="Submit">
-        </form>
-
-        <script>
-
-            var frm = $('#stringForm1');
-                frm.submit(function (e) {
-
-                e.preventDefault();
-
-                var values = $(this).serialize();
-                var note = values.split('=')[1]
-
-                $.ajax({
-                    type: frm.attr('method'),
-                    url: `${frm.attr('action')}/${note}`,
-                    success: function (data) {
-                        console.log('Submission was successful.');
-                        console.log(data);
-                        makeStringSound(data['notes']);
-
-                    },
-                    error: function (data) {
-                        console.log('An error occurred.');
-                        console.log(data);
-                    },
-                });
-            });
-
-
-            function makeStringSound(notes){
-                console.log(notes)
-                const Tone = window.Tone;
-                const now = Tone.now()
-                const synth = new Tone.Synth().toDestination();
-
-                var timeInc = 0.5;
-                notes.forEach(note => {
-                    synth.triggerAttackRelease(note, "8n", now + timeInc)
-                    timeInc = timeInc + 0.5;
-                    }
-                )
-                synth.unsync();
-            }
-
-
-        </script>
-
-
-    </body>
-
-    <h1>yooyoyo</h1>
-
+</body>
 </html>
