@@ -1,21 +1,22 @@
+from typing import Optional
+
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-
-from utils import String
-
+from fastapi.responses import HTMLResponse
+from templates import templates
+from api import router
 app = FastAPI()
+app.include_router(router)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/", response_class=HTMLResponse)
+async def fretboard(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/string/{open_note}")
-def return_string(open_note: str = 'E0'):
-    return String(open_note)
 
 
 if __name__ == "__main__":

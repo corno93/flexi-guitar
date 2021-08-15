@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src=https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.17/Tone.js></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="./styles.css">
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+
     <title>Fretboard</title>
 </head>
 <body>
@@ -19,7 +20,7 @@
     </div>
 
     <div class="fretboard"></div>
-    <script src="./app.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='/js/app.js') }}"></script>
 
 </body>
 </html>

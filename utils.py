@@ -58,13 +58,15 @@ def return_string_using_formula(open_note_freq, fret_numbers, string_guage):
 @dataclass
 class String:
     open_note: str = field(repr=False)
-    notes: list = field(init=False)
+    notes: list = field(init=False, default_factory=list)
 
     def __post_init__(self):
         with open('notes.json') as f:
-            notes = json.load(f)
-        starting_index = list(notes.keys()).index(self.open_note)
-        self.notes = list(islice(notes, starting_index, starting_index + FRET_NUMBERS))
+            note_data = json.load(f)
+        starting_index = list(note_data.keys()).index(self.open_note)
+        note_names = list(islice(note_data, starting_index, starting_index + FRET_NUMBERS))
+        for note_name in note_names:
+            self.notes.append({"name":note_name, "frequency":note_data[note_name]})
 
 
 

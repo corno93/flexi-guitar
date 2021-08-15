@@ -12,6 +12,7 @@ const doubleFretMarkPositions = [12, 24];
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const guitarTunings = [4, 11, 7, 2, 9, 4]; // standard e tuning
+const stringOpenNotes = ["E2", "B0", "G0", "D0", "A0", "E0"]
 
 const app = {
     init(){
@@ -28,27 +29,31 @@ const app = {
             string.classList.add('string');
             fretboard.appendChild(string);
 
-            // add frets
-            for (let fret = 0; fret <= numberOfFrets; fret++){
-                let noteFret = tools.createElement('div');
-                noteFret.classList.add('note-fret');
-                string.appendChild(noteFret);
+            // get string from api
+            $.get(`api/string/${stringOpenNotes[i]}`).done((response)=>{
 
-                let noteName = this.generateNoteNames(fret + guitarTunings[i])
-                noteFret.setAttribute('data-note', noteName);
+                for (i=0; i<response.notes.length;i++){
 
-                // add single fretmarks
-                if (i == 0 && singleFretMarkPositions.includes(fret)){
-                    noteFret.classList.add('single-fretmark');
+                    let noteFret = tools.createElement('div');
+                    noteFret.classList.add('note-fret');
+                    string.appendChild(noteFret);
+
+                    noteFret.setAttribute('data-note', response.notes[i].name);
+                    noteFret.setAttribute('data-frequency', response.notes[i].frequency);
+
+                    // add single fretmarks
+                    if (i == 0 && singleFretMarkPositions.includes(i)){
+                        noteFret.classList.add('single-fretmark');
+                    }
+
+                    // add double fretmarks
+                    if (i == 0 && doubleFretMarkPositions.includes(i)){
+                        let doubleFretMark = tools.createElement('div');
+                        doubleFretMark.classList.add('double-fretmark');
+                        noteFret.appendChild(doubleFretMark);
+                    }
                 }
-
-                // add double fretmarks
-                if (i == 0 && doubleFretMarkPositions.includes(fret)){
-                    let doubleFretMark = tools.createElement('div');
-                    doubleFretMark.classList.add('double-fretmark');
-                    noteFret.appendChild(doubleFretMark);
-                }
-            }
+            })
         }
     },
     generateNoteNames(noteIndex){
