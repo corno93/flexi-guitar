@@ -29,7 +29,6 @@ const Instruments = {
             },
             baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
             onload: () => {
-                // sampler.triggerAttackRelease(["C1", "E1", "G1", "B1"], 0.5);
                 sampler.release = 0.5;
                 sampler.toMaster();
             }

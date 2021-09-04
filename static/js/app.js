@@ -3,22 +3,23 @@ const root = document.documentElement;
 
 const fretboard = document.querySelector('.fretboard');
 const numberOfFretsSelector = document.querySelector('#number-of-frets');
-const toneJs = window.Tone;
+const scaleSelector = document.querySelector('#scale');
+const scaleKeySelector = document.querySelector('#scale-key')
 
-let numberOfFrets = 17;
+let selectedScale = undefined;
+let selectedScaleKey = undefined;
+let numberOfFrets = 15;
+let instruments_ = Instruments.handle();
 const numberOfStrings = 6;
 const singleFretMarkPositions = [3, 5, 7, 9, 15, 17, 19, 21];
 const doubleFretMarkPositions = [12, 24];
 
-const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const guitarTunings = [4, 11, 7, 2, 9, 4]; // standard e tuning
 const stringOpenNotes = ["E4", "B3", "G3", "D3", "A2", "E2"]
 
 const app = {
     init(){
-        const instruments = this.setupTone();
         this.setupFretboard();
-        this.setupEventListeners(instruments);
+        this.setupEventListeners();
     },
     setupFretboard(){
         fretboard.innerHTML = "";
@@ -57,22 +58,20 @@ const app = {
             })
         }
     },
-    setupEventListeners(instruments){
+    setupEventListeners(){
         fretboard.addEventListener('mouseover', (event) => {
             if (event.target.classList.contains('note-fret')){
                 event.target.style.setProperty('--noteDotOpacity', 0.5);
 
                 let note = $(event.target).attr("data-note");
-
-                let now = Tone.now()
-                instruments.triggerAttack(`${note}`);
+                instruments_.triggerAttack(`${note}`);
             }
         })
         fretboard.addEventListener('mouseout', (event) => {
             event.target.style.setProperty('--noteDotOpacity', 0);
             if (event.target.classList.contains('note-fret')){
                 let note = $(event.target).attr("data-note");
-                instruments.triggerRelease(`${note}`);
+                instruments_.triggerRelease(`${note}`);
 
             }
         })
@@ -80,10 +79,70 @@ const app = {
             numberOfFrets = numberOfFretsSelector.value;
             this.setupFretboard();
         })
+        scaleSelector.addEventListener('change', (event)=> {
+            selectedScale = scaleSelector.value;
+            if (selectedScaleKey !== undefined){
+                this.getScale();
+            }
+        })
+        scaleKeySelector.addEventListener('change', (event) => {
+            selectedScaleKey = scaleKeySelector.value;
+            if (selectedScale !== undefined){
+                this.getScale();
+            }
+        })
     },
 
-    setupTone(){
-        return Instruments.handle()
+    getScale(){
+        // turn notes off
+        for (let string_idx =0; string_idx < numberOfStrings; string_idx++){
+                for (let fret_idx=0;fret_idx<numberOfFrets;fret_idx++){
+                    fretboard.children[string_idx].children[fret_idx].style.setProperty('--noteDotOpacity', 0)
+                }
+            }
+
+        // get notes from doc
+        $.get(`api/scale/${selectedScale}/?key=${selectedScaleKey}&tuning=E4,B3,G3,D3,A2,E2`).done((response)=>{
+
+            // turn notes on for new scale
+            for (let string_idx =0; string_idx < numberOfStrings; string_idx++){
+                for (let fret_idx=0;fret_idx<response[0].notes.length;fret_idx++){
+                    if (response[string_idx].notes[fret_idx].is_apart_of_scale === true){
+                        fretboard.children[string_idx].children[fret_idx].style.setProperty('--noteDotOpacity', 1)
+                    }
+                }
+            }
+
+
+            // play sounds and highlight
+            const now = Tone.now();
+            let setIntervalIndex = 0;
+            let time_offset = 0;
+            let fretboardLowString = fretboard.children[numberOfStrings-1].children;
+            let prevIndex = undefined;
+            function change() {
+
+                if (setIntervalIndex === fretboardLowString.length){
+                    clearInterval(timer);
+                    fretboardLowString[prevIndex].style.setProperty('--noteColour', "teal")
+                    return;
+                }
+
+                if (response[0].notes[setIntervalIndex].is_apart_of_scale === true){
+                    time_offset = time_offset + 0.5
+
+                    if (prevIndex !== undefined){
+                        fretboardLowString[prevIndex].style.setProperty('--noteColour', "teal")
+                    }
+                    fretboardLowString[setIntervalIndex].style.setProperty('--noteColour', "yellow")
+                    instruments_.triggerAttackRelease(response[numberOfStrings-1].notes[setIntervalIndex].name, 0.2, now+time_offset)
+                    prevIndex = setIntervalIndex
+                }
+                setIntervalIndex = setIntervalIndex + 1;
+
+            }
+            const timer = setInterval(change, 200);
+        });
     }
 }
 

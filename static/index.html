@@ -18,7 +18,28 @@
             <label for="number-of-frets">Number of frets: </label>
             <input type="number" id="number-of-frets" min="1" max="50" value="12">
         </div>
+
+        <div class="scale">
+            <label for="Scale">Choose a scale:</label>
+            <select name="Scale" id="scale">
+                <option value="" disabled selected>Select your option</option>
+                <option value="minor-pentatonic">minor-pentatonic</option>
+                <option value="minor-pentatonic">minor-pentatonic</option>
+                <option value="minor-pentatonic">minor-pentatonic</option>
+                <option value="minor-pentatonic">minor-pentatonic</option>
+            </select>
+            <label for="ScaleKey">Choose a key for the scale:</label>
+            <select name="ScaleKey" id="scale-key">
+                <option value="" disabled selected>Select your option</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
     </div>
+
+
 
     <div class="fretboard"></div>
     <script type="text/javascript" src="{{ url_for('static', path='/js/app.js') }}"></script>

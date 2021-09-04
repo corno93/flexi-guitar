@@ -6,6 +6,7 @@
     --half-string-height: calc(var(--string-height) / 2);
     --string-top-position: calc(var(--fretboard-height) / var(--number-of-strings) / 2 - var(--half-string-height));
     --noteDotOpacity: 0;
+    --noteColour: teal;
 }
 
 * {
@@ -61,7 +62,7 @@ body {
     border-right: 12px solid;
     flex-grow: 0;
     flex-shrink: 0;
-    border-image: linear-gradient(to left #bbb, #fff, #bbb) 1 100%;
+    border-image: linear-gradient(to left, #bbb, #fff, #bbb) 1 100%;
 }
 
 .note-fret::before{
@@ -71,7 +72,7 @@ body {
     border-radius: 50%;
     line-height: 33px;
     text-align: center;
-    background: teal;
+    background: var(--noteColour);
     z-index: 2;
     color: #eee;
     opacity: var(--noteDotOpacity);

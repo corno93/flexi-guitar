@@ -1,7 +1,9 @@
-from dataclasses import dataclass, field
-from typing import List
 import json
+from dataclasses import dataclass, field
 from itertools import islice
+from typing import List, Optional
+
+from scale import Scale
 
 FRET_NUMBERS = 15
 
@@ -56,19 +58,39 @@ def return_string_using_formula(open_note_freq, fret_numbers, string_guage):
 
 
 @dataclass
+class Fret:
+    name: str
+    number: int
+    note: str = field(init=False)
+    group_id: Optional[int] = field(init=False, default=None)
+    is_apart_of_scale: bool = field(init=False, default=False)
+
+    def __post_init__(self):
+        self.note = self.name[:-1]
+
+    def __eq__(self, other):
+        return self.note == other
+
+    def set_group_id(self, id):
+        self.group_id = id
+
+@dataclass
 class String:
     open_note: str = field(repr=False)
     notes: list = field(init=False, default_factory=list)
 
     def __post_init__(self):
-        with open('notes.json') as f:
+        with open("/home/alex/Code/alex/guitar-spell/flexi-guitar/notes.json") as f:
             note_data = json.load(f)
         starting_index = list(note_data.keys()).index(self.open_note)
         note_names = list(islice(note_data, starting_index, starting_index + FRET_NUMBERS))
-        for note_name in note_names:
-            self.notes.append({"name":note_name, "frequency":note_data[note_name]})
+        for idx, note_name in enumerate(note_names):
+            self.notes.append(Fret(note_name, idx))
 
 
 
-
-
+def map_scale_to_strings(scale: Scale, strings: List[String]):
+    for string in strings:
+        for fret in string.notes:
+            if fret in scale.notes:
+                fret.is_apart_of_scale = True
