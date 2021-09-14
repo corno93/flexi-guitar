@@ -54,6 +54,11 @@ const app = {
                         doubleFretMark.classList.add('double-fretmark');
                         noteFret.appendChild(doubleFretMark);
                     }
+
+                    // when first note, add event listener for changing note
+                    if (note_idx === 0){
+                        this.setupOpenNote(noteFret);
+                    }
                 }
             })
         }
@@ -91,6 +96,31 @@ const app = {
                 this.getScale();
             }
         })
+    },
+
+    notesSelect(openNote){
+        const notes = [openNote.dataset.note, 'A', 'B', 'C', 'D'];
+        let selectList = document.createElement('select');
+
+        // Create and append the options
+        for (var i = 0; i < notes.length; i++) {
+            var option = document.createElement("option");
+            option.value = notes[i];
+            option.text = notes[i];
+            selectList.appendChild(option);
+        }
+
+        selectList.addEventListener("change", (event) => {
+            openNote.setAttribute('data-note', event.target.value)
+        })
+
+        return selectList;
+    },
+
+    setupOpenNote(openNote){
+        const openNotesElement = document.querySelector('#openNotes');
+        openNotesElement.appendChild(this.notesSelect(openNote));
+
     },
 
     getScale(){
