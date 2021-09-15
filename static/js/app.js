@@ -57,7 +57,7 @@ const app = {
 
                     // when first note, add event listener for changing note
                     if (note_idx === 0){
-                        this.setupOpenNote(noteFret);
+                        this.setupOpenNoteSelectors(noteFret, string, string_idx);
                     }
                 }
             })
@@ -99,7 +99,7 @@ const app = {
     },
 
     notesSelect(openNote){
-        const notes = [openNote.dataset.note, 'A', 'B', 'C', 'D'];
+        const notes = [openNote.dataset.note, 'A3', 'B3', 'C3', 'D2'];
         let selectList = document.createElement('select');
 
         // Create and append the options
@@ -110,17 +110,22 @@ const app = {
             selectList.appendChild(option);
         }
 
-        selectList.addEventListener("change", (event) => {
-            openNote.setAttribute('data-note', event.target.value)
-        })
-
         return selectList;
     },
 
-    setupOpenNote(openNote){
+    setupOpenNoteSelectors(openNote, string, string_idx){
         const openNotesElement = document.querySelector('#openNotes');
-        openNotesElement.appendChild(this.notesSelect(openNote));
-
+        let selectList = this.notesSelect(openNote);
+        selectList.style.setProperty('order', string_idx)
+        openNotesElement.appendChild(selectList);
+        selectList.addEventListener("change", (event) => {
+            openNote.setAttribute('data-note', event.target.value)
+             $.get(`api/string/${event.target.value}`).done((response)=> {
+                 for (note_idx = 0; note_idx < response.notes.length; note_idx++) {
+                     string.children[note_idx].setAttribute("data-note", response.notes[note_idx].name)
+                 }
+             })
+        })
     },
 
     getScale(){
@@ -132,7 +137,9 @@ const app = {
             }
 
         // get notes from doc
-        $.get(`api/scale/${selectedScale}/?key=${selectedScaleKey}&tuning=E4,B3,G3,D3,A2,E2`).done((response)=>{
+        let openNotes = Array.from(document.getElementById("openNotes").children).sort((a, b)=> a.style.order - b.style.order).map(g => g.value).toString()
+        console.log(`openNotes: ${openNotes}`)
+        $.get(`api/scale/${selectedScale}/?key=${selectedScaleKey}&tuning=${openNotes}`).done((response)=>{
 
             // turn notes on for new scale
             for (let string_idx =0; string_idx < numberOfStrings; string_idx++){
@@ -142,7 +149,6 @@ const app = {
                     }
                 }
             }
-
 
             // play sounds and highlight
             const now = Tone.now();
