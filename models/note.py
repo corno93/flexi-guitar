@@ -1,8 +1,6 @@
 from pydantic import BaseModel, Field
-from pydantic.dataclasses import dataclass
 
-from models._common import CommonConfig
-from typing import List
+from models._common import CommonConfig, DateTimeModelMixin
 
 
 class NoteBase(BaseModel):
@@ -12,7 +10,7 @@ class NoteBase(BaseModel):
         title = "Note"
         schema_extra = {
             "example": {
-                "name": "A#2",
+                "name": "C0",
             }
         }
 

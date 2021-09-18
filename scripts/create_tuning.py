@@ -1,5 +1,4 @@
 import asyncio
-import os
 import sys
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,11 +11,12 @@ mongodb_client = AsyncIOMotorClient(settings.DB_URL)
 mongodb = mongodb_client[settings.DB_NAME]
 tunings = mongodb.tunings
 
-async def create_tuning():
-    e_standard = TuningModel(name="C Standard", notes=["C2", "F2", "A#3", "D#3", "G3", "E4"])
 
-    if await tunings.find_one({"name": {"$exists": False}}):
-        await mongodb["tunings"].insert_one(e_standard.dict())
+async def create_tuning():
+    tuning_to_create = TuningModel(name="E Standard", notes=["E2", "A2", "D3", "G3", "B3", "E4"])
+
+    if not await tunings.find_one({"name": tuning_to_create.name}):
+        await tunings.insert_one(tuning_to_create.dict())
 
 
 
