@@ -9,7 +9,7 @@ class CommonConfig:
     anystr_strip_whitespace = True
     allow_mutation = False
 
-class DateTimeModelMixin(BaseModel):
-    created_at: Optional[datetime] = Schema(...)
-    updated_at: Optional[datetime] = Schema(...)
+# class DateTimeModelMixin(BaseModel):
+#     created_at: Optional[datetime] = Schema(...)
+#     updated_at: Optional[datetime] = Schema(...)
 
