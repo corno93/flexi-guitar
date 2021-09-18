@@ -9,3 +9,4 @@ I also love my guitar theory and find following scales to be incredibly importan
 
 This website is meant to address the problem of knowing scale and chord positions when using
 an alternative tuning. 
+

@@ -1,0 +1,16 @@
+version: "3.5"
+
+services:
+  database:
+    image: mongo
+    container_name: mongodb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MONGO_INITDB_ROOT_USERNAME=flexi_guitar
+      - MONGO_INITDB_ROOT_PASSWORD=my-secret-pw
+      - MONGO_INITDB_DATABASE=flexi_guitar
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/db:/data/db
