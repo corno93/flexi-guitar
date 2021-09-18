@@ -121,3 +121,9 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 label{
     margin-right: 10px;
 }
+
+.openNotes{
+    display: flex;
+    flex-direction: row;
+
+}
