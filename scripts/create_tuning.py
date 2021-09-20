@@ -11,9 +11,10 @@ mongodb_client = AsyncIOMotorClient(settings.DB_URL)
 mongodb = mongodb_client[settings.DB_NAME]
 tunings = mongodb.tunings
 
+# dict(name="C Standard", notes=["C4", "G3", "D#3", "A#2", "F2", "C2"])
 
 async def create_tuning():
-    tuning_to_create = TuningModel(name="E Standard", notes=["E2", "A2", "D3", "G3", "B3", "E4"])
+    tuning_to_create = TuningModel(name="C Standard", notes=["C4", "G3", "D#3", "A#2", "F2", "C2"])
 
     if not await tunings.find_one({"name": tuning_to_create.name}):
         await tunings.insert_one(tuning_to_create.dict())

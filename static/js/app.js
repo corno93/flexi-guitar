@@ -5,6 +5,7 @@ const fretboard = document.querySelector('.fretboard');
 const numberOfFretsSelector = document.querySelector('#number-of-frets');
 const scaleSelector = document.querySelector('#scale');
 const scaleKeySelector = document.querySelector('#scale-key')
+const tuningSelector = document.querySelector("#tuningSelector");
 
 let selectedScale = undefined;
 let selectedScaleKey = undefined;
@@ -14,7 +15,9 @@ const numberOfStrings = 6;
 const singleFretMarkPositions = [3, 5, 7, 9, 15, 17, 19, 21];
 const doubleFretMarkPositions = [12, 24];
 
-const stringOpenNotes = ["E4", "B3", "G3", "D3", "A2", "E2"]
+const defaultStringOpenNotes = ["E4", "B3", "G3", "D3", "A2", "E2"]
+
+const strings = [];
 
 const app = {
     init(){
@@ -32,7 +35,7 @@ const app = {
             fretboard.appendChild(string);
 
             // get string from api
-            $.get(`api/string/${stringOpenNotes[string_idx]}`).done((response)=>{
+            $.get(`api/string/${defaultStringOpenNotes[string_idx]}`).done((response)=>{
 
                 for (note_idx=0; note_idx<response.notes.length;note_idx++){
 
@@ -54,14 +57,25 @@ const app = {
                         doubleFretMark.classList.add('double-fretmark');
                         noteFret.appendChild(doubleFretMark);
                     }
-
-                    // when first note, add event listener for changing note
-                    if (note_idx === 0){
-                        this.setupOpenNoteSelectors(noteFret, string, string_idx);
-                    }
                 }
             })
         }
+
+        // add tunings
+        $.get(`api/tunings`).done((response) => {
+
+            for (tuning_idx=0;tuning_idx<response.length;tuning_idx++){
+                // Create and append the options
+                let option = document.createElement("option");
+                option.value = response[tuning_idx]["notes"];
+                option.text = `${response[tuning_idx]["name"]} - ${response[tuning_idx]["notes"]}`;
+                tuningSelector.appendChild(option);
+            }
+            let option = document.createElement("option");
+            option.value = "Custom";
+            option.text = "Custom";
+            tuningSelector.appendChild(option);
+        })
     },
     setupEventListeners(){
         fretboard.addEventListener('mouseover', (event) => {
@@ -96,6 +110,52 @@ const app = {
                 this.getScale();
             }
         })
+        // update the strings with the tunings
+        // if custom is chosen, display selectors for each string
+        tuningSelector.addEventListener('change', (event) => {
+            if (event.target.value === "Custom"){
+                // display selectors for notes
+                const customTuningContainer = document.querySelector("#customTuningContainer");
+
+                if (customTuningContainer.childElementCount === 0){
+                    $.get(`api/notes`).done((response) => {
+
+                        // put all notes into 1 select
+                        let selectList = document.createElement('select');
+                        for (let note_idx = 0; note_idx < response.length; note_idx++){
+                            let option = document.createElement("option");
+                            option.value = response[note_idx]['name'];
+                            option.text = response[note_idx]['name'];
+                            selectList.appendChild(option);
+                        }
+                        // now copy the selectList for n strings into the customTuningContainer div
+                        customTuningContainer.appendChild(selectList)
+                        for (string_idx=0;string_idx<numberOfStrings - 1;string_idx++){
+                            customTuningContainer.appendChild(selectList.cloneNode(true));
+                        }
+                    });
+                }
+                customTuningContainer.style.setProperty('visibility', 'visible');
+            }else{
+                customTuningContainer.style.setProperty('visibility', 'hidden');
+
+                const openNotes = event.target.value.replace(/#/g, "%23").split(",");
+
+                // iterate through notes in tuning and update strings
+                let strings = document.querySelectorAll(".string");
+                for (let string_idx=0;string_idx<numberOfStrings;string_idx++){
+                    $.get(`api/string/${openNotes[string_idx]}`).done((response)=> {
+                         for (note_idx = 0; note_idx < response.notes.length; note_idx++) {
+                             strings[string_idx].children[note_idx].setAttribute("data-note", response.notes[note_idx].name)
+                            }
+                        })
+                }
+            }
+        })
+    },
+
+    getString(){
+
     },
 
     notesSelect(openNote){

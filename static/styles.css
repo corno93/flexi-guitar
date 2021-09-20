@@ -127,3 +127,7 @@ label{
     flex-direction: row;
 
 }
+
+.customTuningContainer{
+    visibility: hidden;
+}
