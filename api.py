@@ -31,7 +31,7 @@ async def return_tunings(request: Request):
     return tunings
 
 
-@router.get("/notes/", response_description="List all notes", response_model=List[NoteModel], response_model_exclude_unset=True)
+@router.get("/notes", response_description="List all notes", response_model=List[NoteModel], response_model_exclude_unset=True)
 async def return_notes(request: Request):
     notes = []
     cursor = request.app.mongodb['notes'].find(projection=["name"])
