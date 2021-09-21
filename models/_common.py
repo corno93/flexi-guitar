@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi.openapi.models import Schema
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, Field
 
 
 class CommonConfig:

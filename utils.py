@@ -94,3 +94,19 @@ def map_scale_to_strings(scale: Scale, strings: List[String]):
         for fret in string.notes:
             if fret in scale.notes:
                 fret.is_apart_of_scale = True
+
+
+def note_plus_step(note, step):
+    """Return the note after a step of some size"""
+    NOTES = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"]
+    return NOTES[(NOTES.index(note) + step.value) % len(NOTES)]
+
+
+def find_required_notes_for_scale(key, steps):
+    total = [key]
+    current_note = key
+    for step in steps:
+        next_note = note_plus_step(current_note, step)
+        total.append(next_note)
+        current_note = next_note
+    return total

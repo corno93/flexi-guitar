@@ -2,11 +2,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List
 
+from utils import find_required_notes_for_scale
+
 
 class Step(Enum):
     HALF = 1
     WHOLE = 2
     WHOLE_AND_HALF = 3
+    TWO_WHOLE = 4
 
 
 scale_db = {"minor-pentatonic": {"steps": [Step.WHOLE_AND_HALF, Step.WHOLE, Step.WHOLE, Step.WHOLE_AND_HALF, Step.WHOLE]}}
@@ -63,19 +66,6 @@ def construct_scale(scale_notes, strings):
     g = 1
     pass
 
-def note_plus_step(note, step):
-    """Return the note after a step of some size"""
-    NOTES = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"]
-    return NOTES[(NOTES.index(note) + step.value) % len(NOTES)]
-
-def find_required_notes_for_scale(key, steps):
-    total = [key]
-    current_note = key
-    for step in steps:
-        next_note = note_plus_step(current_note, step)
-        total.append(next_note)
-        current_note = next_note
-    return total
 
 @dataclass
 class Scale:

@@ -3,8 +3,8 @@ const root = document.documentElement;
 
 const fretboard = document.querySelector('.fretboard');
 const numberOfFretsSelector = document.querySelector('#number-of-frets');
-const scaleSelector = document.querySelector('#scale');
-const scaleKeySelector = document.querySelector('#scale-key')
+const scaleSelector = document.querySelector('#scaleSelector');
+const scaleKeySelector = document.querySelector('#scaleKeySelector')
 const tuningSelector = document.querySelector("#tuningSelector");
 
 let selectedScale = undefined;
@@ -47,12 +47,12 @@ const app = {
                     noteFret.setAttribute('data-frequency', response.notes[noteIdx].frequency);
 
                     // add single fretmarks
-                    if (stringIdx == 0 && singleFretMarkPositions.includes(noteIdx)){
+                    if (stringIdx === 0 && singleFretMarkPositions.includes(noteIdx)){
                         noteFret.classList.add('single-fretmark');
                     }
 
                     // add double fretmarks
-                    if (stringIdx == 0 && doubleFretMarkPositions.includes(noteIdx)){
+                    if (stringIdx === 0 && doubleFretMarkPositions.includes(noteIdx)){
                         let doubleFretMark = tools.createElement('div');
                         doubleFretMark.classList.add('double-fretmark');
                         noteFret.appendChild(doubleFretMark);
@@ -61,20 +61,39 @@ const app = {
             })
         }
 
-        // add tunings
+        // add tunings to selector
         $.get(`api/tunings`).done((response) => {
 
-            for (tuning_idx=0;tuning_idx<response.length;tuning_idx++){
+            for (tuningIdx=0;tuningIdx<response.length;tuningIdx++){
                 // Create and append the options
                 let option = document.createElement("option");
-                option.value = response[tuning_idx]["notes"];
-                option.text = `${response[tuning_idx]["name"]} - ${response[tuning_idx]["notes"]}`;
+                option.value = response[tuningIdx]["notes"];
+                option.text = `${response[tuningIdx]["name"]} - ${response[tuningIdx]["notes"]}`;
                 tuningSelector.appendChild(option);
             }
             let option = document.createElement("option");
             option.value = "Custom";
             option.text = "Custom";
             tuningSelector.appendChild(option);
+        })
+
+        // add scales to selector
+        $.get(`api/scales`).done((response) => {
+            for (scaleIdx=0; scaleIdx<response.length;scaleIdx++){
+                let option = document.createElement("option");
+                option.value = response[scaleIdx]["name"];
+                option.text = response[scaleIdx]["name"];
+                scaleSelector.appendChild(option);
+            }
+        })
+        // add scale keys to selector
+        $.get('api/notes?keys_only=True').done((response) => {
+            for (keyIdx=0; keyIdx<response.length;keyIdx++){
+                let option = document.createElement("option");
+                option.value = response[keyIdx]["name"];
+                option.text = response[keyIdx]["name"];
+                scaleKeySelector.appendChild(option);
+            }
         })
     },
     setupEventListeners(){
@@ -165,6 +184,7 @@ const app = {
                         })
                 }
             }
+            this.clearBoard();
         })
     },
 
@@ -183,33 +203,14 @@ const app = {
         return selectList;
     },
 
-    setupOpenNoteSelectors(openNote, string, stringIdx){
-        const openNotesElement = document.querySelector('#openNotes');
-        let selectList = this.notesSelect(openNote);
-        selectList.style.setProperty('order', stringIdx)
-        openNotesElement.appendChild(selectList);
-        selectList.addEventListener("change", (event) => {
-            openNote.setAttribute('data-note', event.target.value)
-             $.get(`api/string/${event.target.value}`).done((response)=> {
-                 for (noteIdx = 0; noteIdx < response.notes.length; noteIdx++) {
-                     string.children[noteIdx].setAttribute("data-note", response.notes[noteIdx].name)
-                 }
-             })
-        })
-    },
-
     getScale(){
         // turn notes off
-        for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
-                for (let fret_idx=0;fret_idx<numberOfFrets;fret_idx++){
-                    fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 0)
-                }
-            }
+        this.clearBoard()
 
-        // use notes from the dom to retrive a scale
-        let openNotes = Array.from(document.getElementById("openNotes").children).sort((a, b)=> a.style.order - b.style.order).map(g => g.value).toString()
-        console.log(`openNotes: ${openNotes}`)
-        $.get(`api/scale/${selectedScale}/?key=${selectedScaleKey}&tuning=${openNotes}`).done((response)=>{
+        // use notes from the dom to retrieve a scale
+        let openNotes = Array.from(document.querySelectorAll(".string")).map(string => string.firstElementChild.dataset.note).toString().replace(/#/g, "%23")
+        console.log(`api/fretboard/tuning=${openNotes}&scale=${selectedScale}&key=${selectedScaleKey}`);
+        $.get(`api/fretboard/tuning=${openNotes}&scale=${selectedScale}&key=${selectedScaleKey}`).done((response)=>{
 
             // turn notes on for new scale
             for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
@@ -249,7 +250,20 @@ const app = {
             }
             const timer = setInterval(change, 200);
         });
+    },
+
+    clearBoard(){
+        // Remove  all notes from the fret board
+        for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
+                for (let fret_idx=0;fret_idx<numberOfFrets;fret_idx++){
+                    fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 0)
+                }
+            }
     }
+
+
+
+
 }
 
 const tools = {

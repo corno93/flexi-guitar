@@ -1,13 +1,13 @@
-from pydantic import BaseModel, Field
-from pydantic.dataclasses import dataclass
+from typing import List
+
+from pydantic import BaseModel
 
 from models._common import CommonConfig, DateTimeModelMixin
-from typing import List
 
 
 class TuningBase(BaseModel):
-    name: str = Field()
-    notes: List[str] = Field()
+    name: str
+    notes: List[str]
     # TODO: add regex validation
 
     class Config(CommonConfig):

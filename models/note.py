@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from models._common import CommonConfig, DateTimeModelMixin
 
 
 class NoteBase(BaseModel):
-    name: str = Field()
+    name: str
 
     class Config(CommonConfig):
         title = "Note"
