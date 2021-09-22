@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from itertools import islice
 from typing import List, Optional
 
-from scale import Scale
 
 FRET_NUMBERS = 15
 
@@ -88,18 +87,18 @@ class String:
             self.notes.append(Fret(note_name, idx))
 
 
-
-def map_scale_to_strings(scale: Scale, strings: List[String]):
-    for string in strings:
-        for fret in string.notes:
-            if fret in scale.notes:
-                fret.is_apart_of_scale = True
+#
+# def map_scale_to_strings(scale: Scale, strings: List[String]):
+#     for string in strings:
+#         for fret in string.notes:
+#             if fret in scale.notes:
+#                 fret.is_apart_of_scale = True
 
 
 def note_plus_step(note, step):
     """Return the note after a step of some size"""
     NOTES = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"]
-    return NOTES[(NOTES.index(note) + step.value) % len(NOTES)]
+    return NOTES[(NOTES.index(note) + step) % len(NOTES)]
 
 
 def find_required_notes_for_scale(key, steps):

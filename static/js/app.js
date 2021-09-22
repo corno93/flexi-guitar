@@ -9,7 +9,7 @@ const tuningSelector = document.querySelector("#tuningSelector");
 
 let selectedScale = undefined;
 let selectedScaleKey = undefined;
-let numberOfFrets = 15;
+let numberOfFrets = 12 + 1;
 let instruments_ = Instruments.handle();
 const numberOfStrings = 6;
 const singleFretMarkPositions = [3, 5, 7, 9, 15, 17, 19, 21];
@@ -37,14 +37,12 @@ const app = {
             // get string from api
             $.get(`api/string/${defaultStringOpenNotes[stringIdx]}`).done((response)=>{
 
-                for (noteIdx=0; noteIdx<response.notes.length;noteIdx++){
+                for (noteIdx=0; noteIdx<response.frets.length;noteIdx++){
 
                     let noteFret = tools.createElement('div');
                     noteFret.classList.add('note-fret');
                     string.appendChild(noteFret);
-
-                    noteFret.setAttribute('data-note', response.notes[noteIdx].name);
-                    noteFret.setAttribute('data-frequency', response.notes[noteIdx].frequency);
+                    noteFret.setAttribute('data-note', response.frets[noteIdx].note);
 
                     // add single fretmarks
                     if (stringIdx === 0 && singleFretMarkPositions.includes(noteIdx)){
@@ -87,7 +85,7 @@ const app = {
             }
         })
         // add scale keys to selector
-        $.get('api/notes?keys_only=True').done((response) => {
+        $.get('api/notes/?keys_only=True').done((response) => {
             for (keyIdx=0; keyIdx<response.length;keyIdx++){
                 let option = document.createElement("option");
                 option.value = response[keyIdx]["name"];
@@ -161,8 +159,8 @@ const app = {
                                 let stringIdx = Array.from(event.target.parentNode.children).indexOf(event.target);
                                 let note = `${event.target.value}`.replace(/#/g, "%23");
                                 $.get(`api/string/${note}`).done((response)=> {
-                                 for (noteIdx = 0; noteIdx < response.notes.length; noteIdx++) {
-                                     strings[stringIdx].children[noteIdx].setAttribute("data-note", response.notes[noteIdx].name)
+                                 for (noteIdx = 0; noteIdx < response.frets.length; noteIdx++) {
+                                     strings[stringIdx].children[noteIdx].setAttribute("data-note", response.frets[noteIdx].note)
                                     }
                                 })
                             });
@@ -178,8 +176,8 @@ const app = {
                 // iterate through notes in tuning and update strings
                 for (let stringIdx=0;stringIdx<numberOfStrings;stringIdx++){
                     $.get(`api/string/${openNotes[stringIdx]}`).done((response)=> {
-                         for (noteIdx = 0; noteIdx < response.notes.length; noteIdx++) {
-                             strings[stringIdx].children[noteIdx].setAttribute("data-note", response.notes[noteIdx].name)
+                         for (noteIdx = 0; noteIdx < response.frets.length; noteIdx++) {
+                             strings[stringIdx].children[noteIdx].setAttribute("data-note", response.frets[noteIdx].note)
                             }
                         })
                 }
@@ -210,12 +208,17 @@ const app = {
         // use notes from the dom to retrieve a scale
         let openNotes = Array.from(document.querySelectorAll(".string")).map(string => string.firstElementChild.dataset.note).toString().replace(/#/g, "%23")
         console.log(`api/fretboard/tuning=${openNotes}&scale=${selectedScale}&key=${selectedScaleKey}`);
-        $.get(`api/fretboard/tuning=${openNotes}&scale=${selectedScale}&key=${selectedScaleKey}`).done((response)=>{
+        $.get(`api/fretboard/${openNotes}?scale=${selectedScale}&key=${selectedScaleKey.replace(/#/g, "%23")}`).done((response)=>{
 
             // turn notes on for new scale
             for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
-                for (let fret_idx=0;fret_idx<response[0].notes.length;fret_idx++){
-                    if (response[stringIdx].notes[fret_idx].is_apart_of_scale === true){
+                for (let fret_idx=0;fret_idx<response[0].frets.length;fret_idx++){
+                    if (response[stringIdx].frets[fret_idx].is_apart_of_scale === true){
+                        fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteColour', 'teal')
+                        fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 1)
+                    }
+                    if (response[stringIdx].frets[fret_idx].is_root_note === true){
+                        fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteColour', '#5a185a')
                         fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 1)
                     }
                 }
@@ -227,23 +230,30 @@ const app = {
             let time_offset = 0;
             let fretboardLowString = fretboard.children[numberOfStrings-1].children;
             let prevIndex = undefined;
+            let prevColour = undefined;
+
+
             function change() {
 
+                // when at the end clear the timer
                 if (setIntervalIndex === fretboardLowString.length){
                     clearInterval(timer);
-                    fretboardLowString[prevIndex].style.setProperty('--noteColour', "teal")
+                    fretboardLowString[prevIndex].style.setProperty('--noteColour', prevColour)
                     return;
                 }
 
-                if (response[0].notes[setIntervalIndex].is_apart_of_scale === true){
+                if (response[0].frets[setIntervalIndex].is_apart_of_scale === true){
                     time_offset = time_offset + 0.5
-
                     if (prevIndex !== undefined){
-                        fretboardLowString[prevIndex].style.setProperty('--noteColour', "teal")
+                        fretboardLowString[prevIndex].style.setProperty('--noteColour', prevColour)
                     }
-                    fretboardLowString[setIntervalIndex].style.setProperty('--noteColour', "yellow")
-                    instruments_.triggerAttackRelease(response[numberOfStrings-1].notes[setIntervalIndex].name, 0.2, now+time_offset)
+                    prevColour = getComputedStyle(fretboardLowString[setIntervalIndex]).getPropertyValue('--noteColour');
                     prevIndex = setIntervalIndex
+
+                    fretboardLowString[setIntervalIndex].style.setProperty('--noteColour', "yellow")
+                    instruments_.triggerAttackRelease(response[numberOfStrings-1].frets[setIntervalIndex].note, 0.2, now+time_offset)
+
+
                 }
                 setIntervalIndex = setIntervalIndex + 1;
 
@@ -257,6 +267,8 @@ const app = {
         for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
                 for (let fret_idx=0;fret_idx<numberOfFrets;fret_idx++){
                     fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 0)
+                    fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteColour', 'teal')
+
                 }
             }
     }
