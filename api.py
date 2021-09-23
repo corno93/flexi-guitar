@@ -3,16 +3,11 @@ from typing import Optional, List
 from fastapi import APIRouter, Request
 
 from models import TuningModel, NoteModel, ScaleModel, StringModel, FretModel
-from scale import Scale
-from utils import String, find_required_notes_for_scale
+from utils import find_required_notes_for_scale
 
 router = APIRouter(prefix="/api")
 
 DEFAULT_TOTAL_FRET_NUMBERS = 12
-
-
-# def get_or_create_string(open_note: str, total_fret_number: Optional[int] = DEFAULT_TOTAL_FRET_NUMBERS):
-
 
 
 @router.get("/string/{open_note}", response_description="A string" ,response_model=StringModel)
@@ -44,8 +39,6 @@ async def return_scale(request: Request):
     return scales
 
 
-
-
 @router.get("/fretboard/{tuning}")
 async def return_fretboard(request: Request, tuning: str, scale: Optional[str] = None, key: Optional[str] = None, total_fret_number: Optional[int]=DEFAULT_TOTAL_FRET_NUMBERS):
     # get scale from db
@@ -69,17 +62,6 @@ async def return_fretboard(request: Request, tuning: str, scale: Optional[str] =
         del string['_id']
 
     return strings
-
-
-
-
-# @router.get("/old_scale/{scale}/")
-# async def return_scale_with_strings(scale: str, key: str, tuning: str):
-#     scale = Scale(scale, key)
-#     strings = [String(a) for a in tuning.split(',')]
-#     map_scale_to_strings(scale, strings)
-#     return strings
-
 
 
 @router.get("/tunings/", response_description="List all tunings", response_model=List[TuningModel], response_model_exclude_unset=True)
