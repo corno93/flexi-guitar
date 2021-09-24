@@ -63,16 +63,14 @@ const app = {
         $.get(`api/tunings`).done((response) => {
 
             let tuningCategories = {};
+            // first organise into categories
             for (tuningIdx=0;tuningIdx<response.length;tuningIdx++) {
-
-                // organise into categories
                 if (!(response[tuningIdx]["category"] in tuningCategories)) {
                     tuningCategories[response[tuningIdx]["category"]] = []
                 }
-
                 tuningCategories[response[tuningIdx]["category"]].push(response[tuningIdx])
             }
-                // create
+            // then create the categories and options
             Object.entries(tuningCategories).forEach(([key, value]) => {
                 let optGroup = document.createElement("optgroup");
                 optGroup.label = key
@@ -84,6 +82,14 @@ const app = {
                 })
                 tuningSelector.appendChild(optGroup);
             })
+            // finally add a custom option
+            let customOptGroup = document.createElement("optgroup");
+            customOptGroup.label = "Custom"
+            let customOption = document.createElement("option");
+            customOption.value = "Custom"
+            customOption.text = "Custom"
+            customOptGroup.appendChild(customOption)
+            tuningSelector.appendChild(customOptGroup)
         })
 
         // add scales to selector
@@ -165,9 +171,14 @@ const app = {
                             let clonedSelectList = selectList.cloneNode(true)
                             customTuningContainer.appendChild(clonedSelectList);
 
-                            // setup event listener for dropdowns
+                            // setup event listener for dropdowns so we can update the string everytime we select
+                            // a note
                             clonedSelectList.addEventListener('change', (event) => {
-                                let stringIdx = Array.from(event.target.parentNode.children).indexOf(event.target);
+
+                                // find the selected string index
+                                let numOfStrings = Array.from(event.target.parentNode.children).length
+                                let stringIdx = (numOfStrings - Array.from(event.target.parentNode.children).indexOf(event.target)) - 1;
+
                                 let note = `${event.target.value}`.replace(/#/g, "%23");
                                 $.get(`api/string/${note}`).done((response)=> {
                                  for (noteIdx = 0; noteIdx < response.frets.length; noteIdx++) {
@@ -182,7 +193,8 @@ const app = {
             }else{
                 customTuningContainer.style.setProperty('visibility', 'hidden');
 
-                const openNotes = event.target.value.replace(/#/g, "%23").split(",");
+                // Note we reverse the notes as
+                const openNotes = event.target.value.replace(/#/g, "%23").split(",").reverse();
 
                 // iterate through notes in tuning and update strings
                 for (let stringIdx=0;stringIdx<numberOfStrings;stringIdx++){
@@ -195,21 +207,6 @@ const app = {
             }
             this.clearBoard();
         })
-    },
-
-    notesSelect(openNote){
-        const notes = [openNote.dataset.note, 'A3', 'B3', 'C3', 'D2'];
-        let selectList = document.createElement('select');
-
-        // Create and append the options
-        for (var i = 0; i < notes.length; i++) {
-            var option = document.createElement("option");
-            option.value = notes[i];
-            option.text = notes[i];
-            selectList.appendChild(option);
-        }
-
-        return selectList;
     },
 
     getScale(){
