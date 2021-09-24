@@ -62,17 +62,28 @@ const app = {
         // add tunings to selector
         $.get(`api/tunings`).done((response) => {
 
-            for (tuningIdx=0;tuningIdx<response.length;tuningIdx++){
-                // Create and append the options
-                let option = document.createElement("option");
-                option.value = response[tuningIdx]["notes"];
-                option.text = `${response[tuningIdx]["name"]} - ${response[tuningIdx]["notes"]}`;
-                tuningSelector.appendChild(option);
+            let tuningCategories = {};
+            for (tuningIdx=0;tuningIdx<response.length;tuningIdx++) {
+
+                // organise into categories
+                if (!(response[tuningIdx]["category"] in tuningCategories)) {
+                    tuningCategories[response[tuningIdx]["category"]] = []
+                }
+
+                tuningCategories[response[tuningIdx]["category"]].push(response[tuningIdx])
             }
-            let option = document.createElement("option");
-            option.value = "Custom";
-            option.text = "Custom";
-            tuningSelector.appendChild(option);
+                // create
+            Object.entries(tuningCategories).forEach(([key, value]) => {
+                let optGroup = document.createElement("optgroup");
+                optGroup.label = key
+                value.forEach(value => {
+                    let option = document.createElement("option");
+                    option.value = value["notes"];
+                    option.text = `${value["name"]} - ${value["notes"]}`;
+                    optGroup.appendChild(option)
+                })
+                tuningSelector.appendChild(optGroup);
+            })
         })
 
         // add scales to selector

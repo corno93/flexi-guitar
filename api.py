@@ -67,7 +67,7 @@ async def return_fretboard(request: Request, tuning: str, scale: Optional[str] =
 @router.get("/tunings/", response_description="List all tunings", response_model=List[TuningModel], response_model_exclude_unset=True)
 async def return_tunings(request: Request):
     tunings = []
-    cursor = request.app.mongodb['tunings'].find(projection=["name", "notes"])
+    cursor = request.app.mongodb['tunings'].find(projection=["name", "notes", "category"])
     async for document in cursor:
         tunings.append(document)
     return tunings
