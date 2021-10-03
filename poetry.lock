@@ -127,17 +127,29 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "motor"
-version = "2.5.1"
+version = "2.3.1"
 description = "Non-blocking MongoDB driver for Tornado or asyncio"
 category = "main"
 optional = false
 python-versions = ">=3.5.2"
 
 [package.dependencies]
-pymongo = ">=3.12,<4"
+pymongo = ">=3.11,<4"
+
+[[package]]
+name = "odmantic"
+version = "0.3.5"
+description = "ODMantic, an AsyncIO MongoDB Object Document Mapper for Python using type hints "
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[package.dependencies]
+motor = ">=2.1.0,<2.4.0"
+pydantic = ">=1.6.2,<1.7 || >1.7,<1.7.1 || >1.7.1,<1.7.2 || >1.7.2,<1.7.3 || >1.7.3,<1.8 || >1.8,<1.8.1 || >1.8.1,<1.9.0"
 
 [package.extras]
-encryption = ["pymongo[encryption] (>=3.12,<4)"]
+fastapi = ["fastapi (>=0.61.1,<0.64.0)"]
 
 [[package]]
 name = "packaging"
@@ -333,7 +345,7 @@ python-versions = ">=3.6.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "d62930ab2160ba8e05ce7fb7b439ff8fe1476a3f6476f2d79b4877e56415a25f"
+content-hash = "42653cf8bb856686cd06d7874d52c7ca422923ce1a17f94d7a2cee16dee1760c"
 
 [metadata.files]
 aiofiles = [
@@ -430,8 +442,12 @@ markupsafe = [
     {file = "MarkupSafe-2.0.1.tar.gz", hash = "sha256:594c67807fb16238b30c44bdf74f36c02cdf22d1c8cda91ef8a0ed8dabf5620a"},
 ]
 motor = [
-    {file = "motor-2.5.1-py3-none-any.whl", hash = "sha256:961fdceacaae2c7236c939166f66415be81be8bbb762da528386738de3a0f509"},
-    {file = "motor-2.5.1.tar.gz", hash = "sha256:663473f4498f955d35db7b6f25651cb165514c247136f368b84419cb7635f6b8"},
+    {file = "motor-2.3.1-py3-none-any.whl", hash = "sha256:ea5a8f5c7cbb08b7c301d7c66746fc96333d634182df236dff0f814f802fe232"},
+    {file = "motor-2.3.1.tar.gz", hash = "sha256:319df35ef9d4099dc125b7d46b552fa88578675e0b06cab94624c666bb0a8a90"},
+]
+odmantic = [
+    {file = "ODMantic-0.3.5-py3-none-any.whl", hash = "sha256:ba62c0c51c224d0d2cfe3684cc7ace4c1fde55bf7631630e1dbe2bd08c6e0b6c"},
+    {file = "ODMantic-0.3.5.tar.gz", hash = "sha256:fe820dc414ecefdc4288f1d57005f6630ee1e720c114d291a1de1dba4e816c57"},
 ]
 packaging = [
     {file = "packaging-21.0-py3-none-any.whl", hash = "sha256:c86254f9220d55e31cc94d69bade760f0847da8000def4dfe1c6b872fd14ff14"},

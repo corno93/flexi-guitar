@@ -2,18 +2,17 @@ import asyncio
 import sys
 
 from motor.motor_asyncio import AsyncIOMotorClient
+from odmantic import AIOEngine
 
 from scale import Step
 
 sys.path.insert(0,'/home/alex/Code/alex/guitar-spell/flexi-guitar/')
 from config import settings
-from models import ScaleModel
+from models import Scale
 
-mongodb_client = AsyncIOMotorClient(settings.DB_URL)
-mongodb = mongodb_client[settings.DB_NAME]
-scales = mongodb.scales
+client = AsyncIOMotorClient(settings.DB_URL)
+engine = AIOEngine(motor_client=client, database=settings.DB_NAME)
 
-# TODO: run in transaction
 
 # scales from wikipedia -> https://en.wikipedia.org/wiki/List_of_musical_scales_and_modes
 SCALES = [('Acoustic scale', 'W-W-W-H-W-H-W'),
@@ -61,32 +60,30 @@ SCALES = [('Acoustic scale', 'W-W-W-H-W-H-W'),
 ('Whole tone scale', 'W-W-W-W-W-W'),
 ('Yo scale', '3H-W-W-3H-W')]
 
-async def create_scale(session):
+async def create_scale():
 
-            for name, intervals in SCALES:
+    scales_to_create = []
 
-                # parse intervals
-                parsed_intervals = []
-                for interval in intervals.split('-'):
-                    if interval == 'H':
-                        parsed_intervals.append(Step.HALF)
-                    elif interval == 'W':
-                        parsed_intervals.append(Step.WHOLE)
-                    elif interval == '3H':
-                        parsed_intervals.append(Step.WHOLE_AND_HALF)
-                    elif interval == '2W':
-                        parsed_intervals.append(Step.TWO_WHOLE)
+    for name, intervals in SCALES:
 
-                scale_to_create = ScaleModel(name=name, intervals=parsed_intervals)
+        # parse intervals
+        parsed_intervals = []
+        for interval in intervals.split('-'):
+            if interval == 'H':
+                parsed_intervals.append(Step.HALF)
+            elif interval == 'W':
+                parsed_intervals.append(Step.WHOLE)
+            elif interval == '3H':
+                parsed_intervals.append(Step.WHOLE_AND_HALF)
+            elif interval == '2W':
+                parsed_intervals.append(Step.TWO_WHOLE)
 
-                if not await session.client[settings.DB_NAME].scales.find_one({"name": scale_to_create.name}):
-                    await session.client[settings.DB_NAME].scales.insert_one(scale_to_create.dict())
+        if not await engine.find_one(Scale, Scale.name == name):
+            scales_to_create.append(Scale(name=name, intervals=parsed_intervals))
 
+    await engine.save_all(scales_to_create)
 
-async def create_scale_in_transaction():
-    async with await mongodb_client.start_session() as session:
-        await session.with_transaction(create_scale)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(create_scale_in_transaction())
+    loop.run_until_complete(create_scale())

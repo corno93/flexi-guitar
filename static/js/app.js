@@ -217,15 +217,14 @@ const app = {
         let openNotes = Array.from(document.querySelectorAll(".string")).map(string => string.firstElementChild.dataset.note).toString().replace(/#/g, "%23")
         console.log(`api/fretboard/tuning=${openNotes}&scale=${selectedScale}&key=${selectedScaleKey}`);
         $.get(`api/fretboard/${openNotes}?scale=${selectedScale}&key=${selectedScaleKey.replace(/#/g, "%23")}`).done((response)=>{
-
             // turn notes on for new scale
-            for (let stringIdx =0; stringIdx < numberOfStrings; stringIdx++){
-                for (let fret_idx=0;fret_idx<response[0].frets.length;fret_idx++){
-                    if (response[stringIdx].frets[fret_idx].is_apart_of_scale === true){
+            for (let stringIdx =0; stringIdx < response.strings.length; stringIdx++){
+                for (let fret_idx=0;fret_idx<response.strings[stringIdx].frets.length;fret_idx++){
+                    if (response.strings[stringIdx].frets[fret_idx].meta.is_in_scale === true){
                         fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteColour', 'teal')
                         fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 1)
                     }
-                    if (response[stringIdx].frets[fret_idx].is_root_note === true){
+                    if (response.strings[stringIdx].frets[fret_idx].meta.is_root_note === true){
                         fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteColour', '#5a185a')
                         fretboard.children[stringIdx].children[fret_idx].style.setProperty('--noteDotOpacity', 1)
                     }
@@ -250,7 +249,7 @@ const app = {
                     return;
                 }
 
-                if (response[0].frets[setIntervalIndex].is_apart_of_scale === true){
+                if (response.strings[0].frets[setIntervalIndex].meta.is_in_scale === true){
                     time_offset = time_offset + 0.5
                     if (prevIndex !== undefined){
                         fretboardLowString[prevIndex].style.setProperty('--noteColour', prevColour)
@@ -259,7 +258,7 @@ const app = {
                     prevIndex = setIntervalIndex
 
                     fretboardLowString[setIntervalIndex].style.setProperty('--noteColour', "yellow")
-                    instruments_.triggerAttackRelease(response[numberOfStrings-1].frets[setIntervalIndex].note, 0.2, now+time_offset)
+                    instruments_.triggerAttackRelease(response.strings[numberOfStrings-1].frets[setIntervalIndex].note, 0.2, now+time_offset)
 
 
                 }

@@ -5,7 +5,7 @@ from typing import List
 from utils import find_required_notes_for_scale
 
 
-class Step(Enum):
+class Step(int, Enum):
     HALF = 1
     WHOLE = 2
     WHOLE_AND_HALF = 3

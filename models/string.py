@@ -43,3 +43,4 @@ class StringBase(BaseModel):
 
 class StringModel(StringBase, DateTimeModelMixin):
     pass
+
