@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class CommonConfig:
     anystr_strip_whitespace = True
-    allow_mutation = False
+    # allow_mutation = False
 
 
 class DateTimeModelMixin(BaseModel):

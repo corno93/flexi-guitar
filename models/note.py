@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from odmantic import Model
 
-from models._common import CommonConfig, DateTimeModelMixin
+from models._common import CommonConfig
 
 
-class NoteBase(BaseModel):
+class Note(Model):
     name: str
 
     class Config(CommonConfig):
@@ -13,7 +13,3 @@ class NoteBase(BaseModel):
                 "name": "C0",
             }
         }
-
-
-class NoteModel(NoteBase, DateTimeModelMixin):
-    pass

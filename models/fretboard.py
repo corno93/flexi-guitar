@@ -1,22 +1,11 @@
 from typing import Optional, List
 
-from odmantic import Field, Model, Reference, EmbeddedModel, ObjectId
+from odmantic import Field, Model, EmbeddedModel, ObjectId
 
 from typing_extensions import TypedDict
 
-from scale import Step
+from models._common import DateTimeModelMixin, CommonConfig
 
-
-class Scale(Model):
-    name: str
-    intervals: List[Step]
-    description: Optional[str] = Field(init=False, repr=False)
-
-
-class Tuning(Model):
-    name: str
-    notes: List[str]
-    category: str
 
 class FretMeta(TypedDict):
     is_root_note: bool
@@ -30,13 +19,11 @@ class String(EmbeddedModel):
     open_note: str
     frets: List[Fret]
 
-class Fretboard(Model):
+class Fretboard(Model, DateTimeModelMixin):
     tuning: str
     strings: List[String]
     scale_id: Optional[ObjectId] = None
     key: Optional[str]
 
-
-
-class Note(Model):
-    name: str
+    class Config(CommonConfig):
+        title = "Fretboard"

@@ -125,14 +125,10 @@ NOTES = ["C0",
 
 async def create_note():
 
-    notes_to_create = []
-
     for note in NOTES:
         if not await engine.find_one(Note, Note.name == note):
             note_to_create = Note(name=note)
-            notes_to_create.append(note_to_create)
-
-    await engine.save_all(notes_to_create)
+            await engine.save(note_to_create)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

@@ -1,11 +1,16 @@
 from typing import List
 
-from pydantic import BaseModel
+from odmantic import Model
 
 from models._common import CommonConfig, DateTimeModelMixin
 
 
-class TuningBase(BaseModel):
+class TuningBase(Model):
+    name: str
+    notes: List[str]
+    category: str
+
+class Tuning(Model, DateTimeModelMixin):
     name: str
     notes: List[str]
     category: str
@@ -19,7 +24,3 @@ class TuningBase(BaseModel):
                 "category": "Dropped"
             }
         }
-
-
-class TuningModel(TuningBase, DateTimeModelMixin):
-    pass
